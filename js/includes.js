@@ -9,7 +9,7 @@ const SECOND = 1_000;
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Helper: dá timeout em uma promise (padrão 10s)
+// Helper: dá timeout em uma promise  
 function withTimeout(promise, ms = SECOND) {
   return Promise.race([
     promise,
@@ -28,25 +28,22 @@ function showMessage(message, id = "erro", type = "warning") {
 
 function loadComponent(id, file) {
   const el = document.getElementById(id);
-
-  fetch(file)
+  return fetch(file)
     .then(res => {
       if (!res.ok) throw new Error(`Erro ao carregar ${file}`);
       return res.text();
     })
-    .then(html => {
-      if (el) el.innerHTML = html;
-    })
+    .then(html => { if (el) el.innerHTML = html; })
     .catch(err => {
       showMessage("Falha ao carregar componente. Tente novamente mais tarde.", "erro", "danger");
-
     });
 }
+
 
 // Busca conteúdos estáticos no Firestore com timeout + loader local 
 async function carregarTexto(pagina, chave, seletor) {
   const el = document.querySelector(seletor);
-
+ 
   try {
     const q = query(collection(db, "conteudoEstatico"), limit(1));
     const snap = await withTimeout(getDocs(q), SECOND);
@@ -70,8 +67,9 @@ async function carregarTexto(pagina, chave, seletor) {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadComponent("navbar", "partials/navbar.html");
-  loadComponent("footer", "partials/footer.html");
+  loadComponent("navbar", "partials/navbar.html"); 
+  loadComponent("footer", "partials/footer.html")
+    .then(() => carregarTexto("footer", "textoRodape", "#textoRodape"));
 
   const path = window.location.pathname;
 
@@ -84,7 +82,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (path.includes("cartas.html")) {
     carregarTexto("cartas", "divInstrucoes", "#divInstrucoes");
-  }
-
-  carregarTexto("footer", "textoRodape", "#textoRodape");
+  }   
 });
